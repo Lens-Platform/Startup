@@ -15,6 +15,7 @@ jobs:
         with:
           platforms: all
       - name: Setup Docker Buildx
+        working-directory: ./podinfo
         id: buildx
         uses: docker/setup-buildx-action@v1
         with:
