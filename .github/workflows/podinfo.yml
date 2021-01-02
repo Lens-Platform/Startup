@@ -1,0 +1,100 @@
+name: Podinfo Continuos Integration Flow
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build image
+        id: build
+        working-directory: ./podinfo
+        run: |
+          IMAGE=test/podinfo:${GITHUB_SHA}
+          docker build -t ${IMAGE} .
+          echo "::set-output name=image::$IMAGE"
+      - name: Scan image
+        uses: docker://docker.io/aquasec/trivy:latest
+        with:
+          args: --cache-dir /var/lib/trivy --no-progress --exit-code 1 --severity MEDIUM,HIGH,CRITICAL ${{ steps.build.outputs.image }}
+
+  kind-helm:
+    strategy:
+      matrix:
+        helm-version:
+          - 2.16.12
+          - 3.3.4
+    env:
+      working-directory: ./podinfo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Kubernetes
+        uses: engineerd/setup-kind@v0.5.0
+      - name: Build container image
+        working-directory: ${{env.working-directory}}
+        run: |
+          ./hack/build.sh
+          kind load docker-image test/podinfo:latest
+      - name: Setup Helm
+        uses: ./.github/actions/helm
+        with:
+          helm-version: ${{ matrix.helm-version }}
+      - name: Install Tiller
+        working-directory: ${{env.working-directory}}
+        if: ${{ startsWith(matrix.helm-version, '2') }}
+        run: ./hack/tiller.sh
+      - name: Deploy
+        working-directory: ${{env.working-directory}}
+        run: ./hack/deploy.sh
+      - name: Run integration tests
+        working-directory: ${{env.working-directory}}
+        run: ./hack/test.sh
+      - name: Debug failure
+        if: failure()
+        run: |
+          kubectl logs -l app=podinfo || true
+
+  test:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./podinfo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Restore Go cache
+        uses: actions/cache@v1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15.x
+      - name: Run unit tests
+        working-directory: ${{env.working-directory}}
+        run: make test
+      - name: Check if working tree is dirty
+        run: |
+          if [[ $(git diff --stat) != '' ]]; then
+            echo 'run make test and commit changes'
+            exit 1
+          fi
+      - name: Validate Helm chart
+        uses: stefanprodan/kube-tools@v1
+        with:
+          command: |
+            helmv3 template ${{env.working-directory}}/charts/podinfo | kubeval --strict
+      - name: Validate kustomization
+        uses: stefanprodan/kube-tools@v1
+        with:
+          command: |
+            kustomize build ${{env.working-directory}}/kustomize | kubeval --strict
+            kustomize build ${{env.working-directory}}/kustomize | conftest test -p .github/policy -
