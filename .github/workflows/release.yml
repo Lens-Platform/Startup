@@ -45,7 +45,7 @@ jobs:
           push: true
           builder: ${{ steps.buildx.outputs.name }}
           context: ./podinfo
-          file: ./Dockerfile
+          file: ./podinfo/Dockerfile
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           tags: |
             docker.io/stefanprodan/podinfo:${{ steps.prep.outputs.VERSION }}
@@ -66,7 +66,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: ./podinfo
           platforms: linux/amd64
-          file: ./Dockerfile.base
+          file: ./podinfo/Dockerfile.base
           tags: docker.io/stefanprodan/podinfo-base:latest
       - name: Publish helm chart
         uses: stefanprodan/helm-gh-pages@master
