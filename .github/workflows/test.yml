@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      working-directory: ./podinfo
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -23,6 +25,7 @@ jobs:
         with:
           go-version: 1.15.x
       - name: Run unit tests
+        working-directory: ${{env.working-directory}}
         run: make test
       - name: Check if working tree is dirty
         run: |
