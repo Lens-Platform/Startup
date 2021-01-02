@@ -48,9 +48,9 @@ jobs:
           file: ./podinfo/Dockerfile
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           tags: |
-            docker.io/stefanprodan/podinfo:${{ steps.prep.outputs.VERSION }}
-            docker.io/stefanprodan/podinfo:latest
-            ghcr.io/stefanprodan/podinfo:${{ steps.prep.outputs.VERSION }}
+            docker.io/blackspaceinc/podinfo:${{ steps.prep.outputs.VERSION }}
+            docker.io/blackspaceinc/podinfo:latest
+            ghcr.io/blackspaceinc/podinfo:${{ steps.prep.outputs.VERSION }}
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.description=${{ github.event.repository.description }}
@@ -67,7 +67,7 @@ jobs:
           context: ./podinfo
           platforms: linux/amd64
           file: ./podinfo/Dockerfile.base
-          tags: docker.io/stefanprodan/podinfo-base:latest
+          tags: docker.io/blackspaceinc/podinfo-base:latest
       - name: Publish helm chart
         uses: stefanprodan/helm-gh-pages@master
         with:
