@@ -31,12 +31,15 @@ jobs:
         with:
           helm-version: ${{ matrix.helm-version }}
       - name: Install Tiller
+        working-directory: ${{env.working-directory}}
         if: ${{ startsWith(matrix.helm-version, '2') }}
-        run: ./podinfo/hack/tiller.sh
+        run: ./hack/tiller.sh
       - name: Deploy
-        run: ./podinfo/hack/deploy.sh
+        working-directory: ${{env.working-directory}}
+        run: ./hack/deploy.sh
       - name: Run integration tests
-        run: ./podinfo/hack/test.sh
+        working-directory: ${{env.working-directory}}
+        run: ./hack/test.sh
       - name: Debug failure
         if: failure()
         run: |
