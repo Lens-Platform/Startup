@@ -37,10 +37,10 @@ jobs:
         uses: stefanprodan/kube-tools@v1
         with:
           command: |
-            helmv3 template ./podinfo/charts/podinfo | kubeval --strict
+            helmv3 template ${{env.working-directory}}/charts/podinfo | kubeval --strict
       - name: Validate kustomization
         uses: stefanprodan/kube-tools@v1
         with:
           command: |
-            kustomize build ./kustomize | kubeval --strict
-            kustomize build ./kustomize | conftest test -p .github/policy -
+            kustomize build ${{env.working-directory}}/kustomize | kubeval --strict
+            kustomize build ${{env.working-directory}}/kustomize | conftest test -p .github/policy -
