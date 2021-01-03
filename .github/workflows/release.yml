@@ -48,9 +48,9 @@ jobs:
           file: ./podinfo/Dockerfile
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           tags: |
-            docker.io/blackspaceinc/podinfo:${{ steps.prep.outputs.VERSION }}
-            docker.io/blackspaceinc/podinfo:latest
-            ghcr.io/blackspaceinc/podinfo:${{ steps.prep.outputs.VERSION }}
+            blackspaceinc/podinfo:${{ steps.prep.outputs.VERSION }}
+            blackspaceinc/podinfo:latest
+            blackspaceinc/podinfo:${{ steps.prep.outputs.VERSION }}
           labels: |
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.description=${{ github.event.repository.description }}
