@@ -72,6 +72,11 @@ jobs:
         uses: stefanprodan/helm-gh-pages@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          charts_dir: ./podinfo/charts
+          branch: gh-pages
+          target_dir: ./podinfo/charts
+          commit_username: LensPlatform
+          commit_email: yoanyombapro@gmail.com
       - uses: ./.github/actions/release-notes
       - name: Generate release notes
         run: |
