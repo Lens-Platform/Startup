@@ -10,6 +10,7 @@ jobs:
   release-notes:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: ./.github/actions/release-notes
       - name: Generate release notes
         run: |
