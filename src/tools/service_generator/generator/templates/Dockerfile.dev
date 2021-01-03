@@ -1,0 +1,38 @@
+FROM golang
+
+ARG BUILD_DATE
+ARG VERSION
+ARG REVISION
+
+# define container level tags
+LABEL version="1.0" maintainer="Yoan Yomba <yoanyombapro@gmail.com>"
+LABEL author="Yoan Yomba"
+LABEL company="BlackSpaceInc"
+LABEL maintainer="BlackSpaceInc" \
+  org.opencontainers.image.created=$BUILD_DATE \
+  org.opencontainers.image.url="https://github.com/BlackspaceInc/service" \
+  org.opencontainers.image.source="https://github.com/BlackspaceInc/service" \
+  org.opencontainers.image.version=$VERSION \
+  org.opencontainers.image.revision=$REVISION \
+  org.opencontainers.image.vendor="BlackSpaceInc" \
+  org.opencontainers.image.title="service" \
+  org.opencontainers.image.description="Microservice For The BlackSpace \
+  Platform" \
+  org.opencontainers.image.licenses="MIT"
+
+# create a directory in which to copy files on local filesystem
+RUN mkdir -p /go/src/github.com/BlackspaceInc/service
+
+# copy files on local file system
+ADD . /go/src/github.com/BlackspaceInc/service
+
+# define execution context
+WORKDIR /go/src/github.com/BlackspaceInc/service/
+
+# download package level dependencies
+RUN go mod download
+RUN go get github.com/canthefason/go-watcher
+RUN go install github.com/canthefason/go-watcher/cmd/watcher
+
+# define container entrypoint
+ENTRYPOINT watcher -run /go/src/github.com/BlackspaceInc/service/cmd/podinfo -watch github.com/BlackspaceInc/service

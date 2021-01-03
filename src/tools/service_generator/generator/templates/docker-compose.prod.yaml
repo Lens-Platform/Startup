@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  #service for the blackspace platform
+  service:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: service
+    ports:
+      - "9898:9898"
+      - "9999:9999"
+      - "9797:9797"
+    restart: always

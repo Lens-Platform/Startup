@@ -1,0 +1,43 @@
+policies:
+  - type: commit
+    spec:
+      header:
+        length: 89
+        imperative: true
+        case: lower
+        invalidLastCharacters: .
+      body:
+        required: false
+      dco: true
+      gpg: false
+      spellcheck:
+        locale: US
+      maximumOfOneCommit: false
+      conventional:
+        types:
+          - "type"
+          - "chore"
+          - "fix"
+          - "build"
+          - "ci"
+          - "docs"
+          - "style"
+          - "refactor"
+          - "perf"
+          - "test"
+        scopes:
+          - "scope"
+        descriptionLength: 72
+  - type: license
+    spec:
+      skipPaths:
+        - .git/
+        - .build*/
+      includeSuffixes:
+        - .ext
+      excludeSuffixes:
+        - .exclude-ext-prefix.ext
+      header: |
+        Apache License
+        Version 2.0, January 2020
+        http://www.apache.org/licenses/

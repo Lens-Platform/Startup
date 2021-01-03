@@ -1,0 +1,5 @@
+syntax = "proto3";
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+import "github.com/protobuf/src/google/protobuf/timestamp.proto";
+
+option go_package = "models";

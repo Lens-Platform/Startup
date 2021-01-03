@@ -1,0 +1,20 @@
+name: pre-commit
+
+on:
+  pull_request:
+    branches:
+      - master
+      - dev
+  push:
+    branches:
+      - master
+      - dev
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Conform Action
+      uses: talos-systems/conform@v0.1.0-alpha.20

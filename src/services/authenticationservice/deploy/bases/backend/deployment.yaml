@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  minReadySeconds: 3
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 60
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: keratin/authn-server:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        command:
+        - sh -c "./authn migrate && ./authn server"
+        env:
+          - name: AUTHN_URL
+            value: "http://localhost:8404"
+          - name: APP_DOMAINS
+            value: "localhost"
+          - name: SECRET_KEY_BASE
+            value: "secret"
+          - name: DATABASE_URL
+            value: "sqlite3://:memory:?mode=memory\&cache=shared" # TODO change this to actual database instance in the cloud
+          - name: REDIS_URL
+            value: "cache:6379" # TODO change this to actual redis cluster in the cloud
+          - name: HTTP_AUTH_USERNAME
+            value: "test"
+          - name: HTTP_AUTH_PASSWORD
+            value: "test"
+          - name: ENABLE_SIGNUP
+            value: "false"
+          - name: ACCESS_TOKEN_TTL
+            value: "86400"
+          - name: REFRESH_TOKEN_TTL
+            value: "2592000"
+          - name: SESSION_KEY_SALT
+            value: "test"
+          - name: DB_ENCRYPTION_KEY_SALT
+            value: "test"
+          - name: USERNAME_IS_EMAIL
+            value: "true"
+          - name: PASSWORD_POLICY_SCORE
+            value: "2"
+          - name: PASSWORD_CHANGE_LOGOUT
+            value: "true"
+          - name: APP_PASSWORD_RESET_URL
+            value: ""
+          - name: PASSWORD_RESET_TOKEN_TTL
+            value: "1800"
+          - name: APP_PASSWORD_CHANGED_URL
+            value: ""
+        livenessProbe:
+          exec:
+            command:
+            - curl
+            - -f
+            - localhost:8404/health
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - curl
+            - -f
+            - localhost:8404/health
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi

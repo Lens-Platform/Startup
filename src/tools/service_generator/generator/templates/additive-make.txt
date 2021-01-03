@@ -1,0 +1,56 @@
+gqlproto:
+	protoc -I. \
+		-I$(GOPATH)/src \
+		-I=$(GOPATH)/src/github.com/infobloxopen/protoc-gen-gorm \
+		-I=$(GOPATH)/src/github.com/infobloxopen/atlas-app-toolkit \
+		-I=$(GOPATH)/src/github.com/lyft/protoc-gen-validate/validate/validate.proto \
+		-I=$(GOPATH)/src/github.com/infobloxopen/protoc-gen-gorm/options \
+		-I=$(GOPATH)/src/github.com/protobuf/src/google/protobuf/timestamp.proto \
+		--gogoopsee_out=plugins=grpc+graphql,Mopsee/protobuf/opsee.proto=github.com/opsee/protobuf/opseeproto,Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor:./graphql/ --proto_path=$(GOPATH)/src:. ./models/*.proto
+
+protogen: gqlproto
+	@echo "setting up service schema definition via protobuf"
+	protoc -I. \
+			-I$(GOPATH)/src \
+			-I=$(GOPATH)/src/github.com/infobloxopen/protoc-gen-gorm \
+			-I=$(GOPATH)/src/github.com/infobloxopen/atlas-app-toolkit \
+			-I=$(GOPATH)/src/github.com/lyft/protoc-gen-validate/validate/validate.proto \
+			-I=$(GOPATH)/src/github.com/infobloxopen/protoc-gen-gorm/options \
+			-I=$(GOPATH)/src/github.com/protobuf/src/google/protobuf/timestamp.proto \
+			--proto_path=${GOPATH}/src/github.com/gogo/protobuf/protobuf \
+			--govalidators_out=./graphql/ \
+			--go_out=plugins=grpc:./graphql/ --gorm_out="engine=postgres:./graphql/" ./models/schema.proto
+
+updateSchema: protogen gqlproto
+	go run github.com/99designs/gqlgen
+
+down:
+	docker-compose down
+	./scripts/clean.sh
+
+up:
+	docker-compose -f docker-compose.dev.yml -f docker-compose.monitoring.dev.yml config
+	docker-compose -f docker-compose.dev.yml -f docker-compose.monitoring.dev.yml up --remove-orphans
+
+kube:
+	kompose convert -f docker-compose.prod.yml -o ./deployments/kubemanifests.yml
+	kubectl apply -f kubemanifests.yml
+
+deploy-service:
+	kubectl apply -f ./deployments/kubemanifests.yml
+	kubectl apply -f ./deployments/service.yml
+
+deploy-dev:
+	@echo "deploying service to development environment First we attach the linkerd proxy sidecar to the service then we deploy"
+	kustomize build ./deploy/overlays/dev | kubectl apply -f-
+
+deploy-staging:
+	@echo "deploying service to staging environment. First we attach the linkerd proxy sidecar to the service then we deploy"
+	kustomize build ./deploy/overlays/staging | kubectl apply -f-
+
+deploy-production:
+	@echo "deploying service to production environment First we attach the linkerd proxy sidecar to the service then we deploy"
+	kustomize build ./overlays/production | kubectl apply -f-
+
+deploy: deploy-dev deploy-staging
+	@echo "deploying"

@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  # service for the blackspace platform
+  service:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: service
+    ports:
+      - "9898:9898"
+    restart: unless-stopped
+    networks:
+      - net
+    volumes:
+      - '.:/go/src/github.com/Lens-Platform/Platform/src/services/service'
+
+networks:
+  net:
+    driver: bridge

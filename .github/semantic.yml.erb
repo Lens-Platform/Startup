@@ -1,0 +1,30 @@
+# Always validate the PR title, and ignore the commits
+titleOnly: true
+
+types:
+  - chore               # An internal change this is not observable by users.
+  - docs                # Any user observable documentation change.
+  - enhancement         # Any user observable enhancement to an existing feature.
+  - feat                # Any user observable new feature, such as a new platform or service.
+  - fix                 # Any user observable bug fix.
+  - perf                # Any user observable performance improvment.
+  - status              # A status change to a blackspace component.
+  - config              # A config change to a blackspace component. 
+  - tech debt           # A change associated with technical debt
+
+scopes:
+
+  # domains
+  <%- metadata.domains.each do |domain| -%>
+  - <%= domain.name.downcase %>
+  <%- end -%>
+
+  # platforms
+  <%- metadata.platform_names.each do |platform|  -%>
+  - <%= platform.downcase %> platform
+  <%- end -%>
+
+  # providers
+  <%- metadata.service_providers.each do |service_provider| -%>
+  - <%= service_provider.downcase %> provider
+  <%- end -%>

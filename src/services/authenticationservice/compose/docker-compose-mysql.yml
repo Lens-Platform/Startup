@@ -1,0 +1,64 @@
+version: "3.7"
+
+services:
+  mysql:
+    container_name: ${MYSQL_NAME}
+    image: mysql:5.7
+    ports:
+      - ${MYSQL_EXTERNAL_PORT}:${MYSQL_INTERNAL_PORT}
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - monitor-net
+
+  redis:
+    container_name: ${REDIS_NAME}
+    image: redis
+    networks:
+      - monitor-net
+    ports:
+      - ${REDIS_EXTERNAL_PORT}:${REDIS_INTERNAL_PORT}
+
+  # docker run -it --rm  --publish 8080:3000   -e AUTHN_URL=http://localhost:8080   -e APP_DOMAINS=localhost   -e DATABASE_URL=sqlite3://:memory:?mode=memory\&cache=shared   -e SECRET_KEY_BASE=changeme   -e HTTP_AUTH_USERNAME=hello   -e HTTP_AUTH_PASSWORD=world   --name authn_app   keratin/authn-server:latest   sh -c "./authn migrate && ./authn server"
+  service:
+    container_name: ${SERVICE_NAME}
+    image: keratin/authn-server:latest
+    ports:
+      -  ${AUTHN_EXTERNAL_PORT}:${AUTHN_INTERNAL_PORT}
+    environment:
+      # This specifies the base URL of the AuthN service. It will be embedded in all issued JWTs as the iss.
+      # Clients will depend on this information to find and fetch the service's public key when verifying JWTs.
+      - AUTHN_URL=${AUTHN_PRIVATE_BASE_URL}:${AUTHN_EXTERNAL_PORT}
+      - APP_DOMAINS=${AUTHN_DOMAINS}
+      - SECRET_KEY_BASE=${AUTHN_SECRET}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - HTTP_AUTH_USERNAME=${AUTHN_USERNAME}
+      - HTTP_AUTH_PASSWORD=${AUTHN_PASSWORD}
+      - ENABLE_SIGNUP=${ENABLE_SIGNUP}
+      - ACCESS_TOKEN_TTL=${ACCESS_TOKEN_TTL}
+      - REFRESH_TOKEN_TTL=${REFRESH_TOKEN_TTL}
+      - SESSION_KEY_SALT=${SESSION_KEY_SALT}
+      - DB_ENCRYPTION_KEY_SALT=${DB_ENCRYPTION_KEY_SALT}
+      - USERNAME_IS_EMAIL=${USERNAME_IS_EMAIL}
+      - PASSWORD_POLICY_SCORE=${PASSWORD_POLICY_SCORE}
+      - PASSWORD_CHANGE_LOGOUT=${PASSWORD_CHANGE_LOGOUT}
+      - APP_PASSWORD_RESET_URL=${APP_PASSWORD_RESET_URL}
+      - PASSWORD_RESET_TOKEN_TTL=${PASSWORD_RESET_TOKEN_TTL}
+      - APP_PASSWORD_CHANGED_URL=${APP_PASSWORD_CHANGED_URL}
+    depends_on:
+      - redis
+      - mysql
+    networks:
+      - monitor-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8404"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    command: sh -c "./authn migrate && ./authn server"
+
+networks:
+  monitor-net:
+    driver: bridge

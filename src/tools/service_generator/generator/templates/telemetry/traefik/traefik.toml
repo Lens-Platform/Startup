@@ -1,0 +1,52 @@
+logLevel="DEBUG"
+debug=true
+
+defaultEntryPoints = ["http", "https"]
+
+[entryPoints]
+  [entryPoints.dashboard]
+    address = ":8080"
+    [entryPoints.dashboard.transport]
+      [entryPoints.dashboard.transport.lifeCycle]
+        requestAcceptGraceTimeout = 42
+        graceTimeOut = 42
+      [entryPoints.dashboard.transport.respondingTimeouts]
+        readTimeout = 42
+        writeTimeout = 42
+        idleTimeout = 42
+      [entryPoints.dashboard.proxyProtocol]
+        insecure = true
+        trustedIPs = ["127.0.0.1", "192.168.0.1"]
+      [entryPoints.dashboard.forwardedHeaders]
+        insecure = true
+        trustedIPs = ["127.0.0.1", "192.168.0.1"]
+  [entryPoints.dashboardsecure]
+    address = ":443"
+  [entryPoints.streaming]
+    address = ":1704/udp"
+
+[api]
+  insecure = true
+  entrypoint="dashboard"
+  dashboard = true
+
+[entryPoints.http]
+address = ":80"
+    [entryPoints.http.redirect]
+
+[tracing]
+    [metrics.prometheus]
+        buckets = [0.1,0.3,1.2,5.0]
+        addEntryPointsLabels = true
+        addServicesLabels = true
+
+[metrics]
+
+[accessLog]
+
+[docker]
+endpoint="unix://var/run/docker.sock"
+watch = true
+network = "monitor-net"
+useBindPortIP = true
+

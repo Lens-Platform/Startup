@@ -1,0 +1,97 @@
+# Always validate the PR title, and ignore the commits
+titleOnly: true
+
+types:
+  - chore               # An internal change this is not observable by users.
+  - docs                # Any user observable documentation change.
+  - enhancement         # Any user observable enhancement to an existing feature.
+  - feat                # Any user observable new feature, such as a new platform or service.
+  - fix                 # Any user observable bug fix.
+  - perf                # Any user observable performance improvment.
+  - status              # A status change to a blackspace component.
+  - config              # A config change to a blackspace component. 
+  - tech debt           # A change associated with technical debt
+
+scopes:
+
+  # domains
+  - administration
+  - architecture
+  - auth
+  - buffers
+  - cli
+  - ci
+  - codecs
+  - config
+  - data model
+  - deps
+  - compression
+  - dev
+  - enriching
+  - filtering
+  - external docs
+  - internal docs
+  - extensions
+  - healthchecks
+  - logs
+  - mapping
+  - marketing
+  - metrics
+  - observability
+  - parsing
+  - platforms
+  - privacy
+  - processing
+  - networking
+  - performance
+  - releasing
+  - reliability
+  - reload
+  - rfcs
+  - security
+  - setup
+  - shutdown
+  - startup
+  - templating
+  - tests
+  - traces
+  - topology
+
+  # platforms
+  - arm64 platform
+  - armv7 platform
+  - amazon-linux platform
+  - centos platform
+  - debian platform
+  - docker platform
+  - dpkg platform
+  - homebrew platform
+  - macos platform
+  - msi platform
+  - nix platform
+  - nixos platform
+  - raspbian platform
+  - rhel platform
+  - rpm platform
+  - ubuntu platform
+  - windows platform
+  - x86_64 platform
+
+  # providers
+  - aws provider
+  - confluent provider
+  - heroku provider
+  - splunk provider
+  - yandex provider
+  - datadog provider
+  - azure provider
+  - elastic provider
+  - gcp provider
+  - honeycomb provider
+  - humio provider
+  - influxdata provider
+  - logdna provider
+  - grafana provider
+  - new relic provider
+  - papertrail provider
+  - sematext provider
